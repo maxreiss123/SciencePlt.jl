@@ -1,0 +1,65 @@
+module SciencePlots
+
+using Plots
+
+export use_science_theme, science_plot
+
+const SCIENCE_COLORS = [
+    "#0C5DA5", "#00B945", "#FF9500", "#FF2C00", "#845B97", "#474747", "#9e9e9e"
+]
+
+function use_science_theme()
+    theme(:default)  # Start from the default theme
+    
+    # Apply science-inspired settings
+    default(
+        # Figure settings
+        size = (450, 350),  # Roughly equivalent to 3.5x2.625 inches at 128 DPI
+        dpi = 128,
+        
+        # Font settings (using serif for Plotly)
+        fontfamily = "Times New Roman",  # Try "Times New Roman" or "Serif"
+        titlefont = Plots.font("Times New Roman", 12),
+        guidefont = Plots.font("Times New Roman", 10),
+        tickfont = Plots.font("Times New Roman", 8),
+        legendfont = Plots.font("Times New Roman", 8),
+        
+        # Colors
+        seriescolor = SCIENCE_COLORS[1],  # Default line color
+        palette = SCIENCE_COLORS,         # Color cycle for multiple series
+        
+        # Axes and ticks
+        framestyle = :box,                # Boxed axes
+        tick_direction = :in,             # Ticks point inward (approximated in Plotly)
+        minorticks = true,                # Enable minor ticks (Plotly supports this)
+        minorgrid = false,                # No minor grid by default
+        grid = true,                      # Major grid enabled
+        gridwidth = 0.5,                  # Thin grid lines
+        linewidth = 1.0,                  # Default line width
+        
+        # Legend
+        legend = :best,                   # Default legend position
+        background_color_legend = :white, # White legend background
+        foreground_color_legend = :black  # Black legend text
+    )
+    println("Applied 'science' theme to Plots.jl with Plotly backend.")
+end
+
+function science_plot(x, y; xlabel="", ylabel="", title="", grid=true, kwargs...)
+    # Ensure the science theme is applied
+    use_science_theme()
+    
+    # Create the plot
+    p = plot(
+        x, y;
+        xlabel=xlabel,
+        ylabel=ylabel,
+        title=title,
+        grid=grid,
+        kwargs...
+    )
+    
+    return p
+end
+
+end 

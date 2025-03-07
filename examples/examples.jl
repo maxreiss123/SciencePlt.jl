@@ -1,13 +1,15 @@
-include("sci.jl")
+include("../src/SciencePlt.jl")
 
-using .SciencePlots
+using .SciencePlt
 using Plots
 using LaTeXStrings
 
+# Model function (similar to SciencePlots Python examples)
 function model(x, p)
     return x .^ (2 * p + 1) ./ (1 .+ x .^ (2 * p))
 end
 
+# Create a directory for figures
 isdir("figures") || mkdir("figures")
 
 # Example 1: Basic science style
@@ -23,6 +25,7 @@ function example_science()
     
     # Create a plot
     plt = plot(
+        title = "",
         xlabel = L"Voltage (mV)",
         ylabel = L"Current ($\mu$A)",
         legend = :bottomright,
@@ -47,21 +50,23 @@ function example_ieee()
     
     x = LinRange(0.75, 1.25, 201)
     p_values = [10, 20, 40, 100]
+    linestyles = [:solid, :dash, :dot, :dashdot]
     
     # Use the IEEE style
     use_style("science+ieee")
     
     # Create a plot
     plt = plot(
+        title = "",
         xlabel = L"Voltage (mV)",
         ylabel = L"Current ($\mu$A)",
         legend = :bottomright,
         legendtitle = "Order"
     )
     
-    # Add lines for each p value
-    for p in p_values
-        plot!(plt, x, model(x, p), label = "$p")
+    # Add lines for each p value with specific line styles
+    for (i, p) in enumerate(p_values)
+        plot!(plt, x, model(x, p), label = "$p", linestyle = linestyles[i])
     end
     
     # Save the plot
@@ -83,6 +88,7 @@ function example_vibrant()
     
     # Create a plot
     plt = plot(
+        title = "",
         xlabel = L"Voltage (mV)",
         ylabel = L"Current ($\mu$A)",
         legend = :bottomright,

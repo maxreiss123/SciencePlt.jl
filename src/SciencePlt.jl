@@ -9,10 +9,13 @@ export science_theme, apply_theme
 export use_style, with_style
 export list_styles, list_categories
 
+# Helper function to convert hex to color
 hex_to_color(hex) = parse(Colorant, hex)
 
+# Global variable to store styles
 const STYLES = Dict{String, Dict{Symbol, Any}}()
 
+# Style categories
 const STYLE_CATEGORIES = [
     "science",       # Base scientific style
     "journals",      # Journal-specific styles
@@ -372,8 +375,8 @@ function register_journal_styles()
                 hex_to_color("#FF0000"), # red
                 hex_to_color("#0000FF"), # blue
                 hex_to_color("#00FF00")  # green
-            ],
-            :linestyle => [:solid, :dash, :dot, :dashdot]
+            ]
+            # linestyle will be applied individually to plots, not globally
         )
     )
     
@@ -548,6 +551,7 @@ function register_combination_styles()
     end
 end
 
+# Initialize all styles
 register_base_styles()
 register_color_styles()
 register_journal_styles()
@@ -555,4 +559,4 @@ register_misc_styles()
 register_language_styles()
 register_combination_styles()
 
-end 
+end # module

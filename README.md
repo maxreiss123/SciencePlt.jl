@@ -1,6 +1,6 @@
 # SciencePlt.jl
 
-A Julia helper file for fast and easy plot configuration
+A package to create nice looking plots
 
 ## Overview
 
@@ -13,5 +13,20 @@ Will provide a simple interface for creating professional scientific plots in Ju
 - Carefully selected color palette for good contrast and readability
 - Sensible defaults for plot dimensions, tick marks, and grid lines
 
-## Work in progress
 
+# How to use it?
+- Install the package:
+  ```julia
+    using Pkg
+    
+    Pkg.add(url="https://github.com/maxreiss123/SciencePlt.jl.git")
+
+    ```
+- The usage of the various styles is given in the examples
+ 
+  
+ # Acknowledgement
+ - The package was inspired by the great looking [SciencePlots](https://github.com/garrettj403/SciencePlots)
+
+
+## Work in progress

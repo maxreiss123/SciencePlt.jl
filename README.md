@@ -1,4 +1,4 @@
-# jlSciencePlots
+# SciencePlt.jl
 
 A Julia helper file for fast and easy plot configuration
 

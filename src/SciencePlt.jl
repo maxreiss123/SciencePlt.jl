@@ -1,4 +1,4 @@
-module SciencePlots
+module SciencePlt
 
 using Plots
 using Colors
@@ -9,7 +9,10 @@ export science_theme, apply_theme
 export use_style, with_style
 export list_styles, list_categories
 
-# Style categories
+hex_to_color(hex) = parse(Colorant, hex)
+
+const STYLES = Dict{String, Dict{Symbol, Any}}()
+
 const STYLE_CATEGORIES = [
     "science",       # Base scientific style
     "journals",      # Journal-specific styles
@@ -17,9 +20,6 @@ const STYLE_CATEGORIES = [
     "languages",     # Language support
     "misc"           # Miscellaneous style settings
 ]
-
-# Store all available styles
-const STYLES = Dict{String, Dict{Symbol, Any}}()
 
 """
     list_categories()
@@ -51,8 +51,12 @@ function use_style(style::String)
         error("Style '$style' not found. Available styles: $(join(list_styles(), ", "))")
     end
     
-    theme = STYLES[style][:theme]
-    Plots.theme(theme)
+    # Get the theme dictionary
+    theme_dict = STYLES[style][:theme]
+    
+    # Apply the core attributes directly
+    Plots.default(; theme_dict...)
+    
     return nothing
 end
 
@@ -66,12 +70,17 @@ function with_style(f::Function, style::String)
         error("Style '$style' not found. Available styles: $(join(list_styles(), ", "))")
     end
     
-    old_theme = Plots.theme()
+    # Save current settings
+    old_settings = Plots.default()
+    
     try
+        # Apply new style
         use_style(style)
+        # Execute function
         return f()
     finally
-        Plots.theme(old_theme)
+        # Restore old settings
+        Plots.default(; old_settings...)
     end
 end
 
@@ -85,32 +94,34 @@ function apply_theme(p, style::String)
         error("Style '$style' not found. Available styles: $(join(list_styles(), ", "))")
     end
     
+    # Get theme dictionary
     theme_dict = STYLES[style][:theme]
-    for (k, v) in theme_dict
-        try
-            plot!(p; Dict(k => v)...)
-        catch
-            # Skip attributes that can't be applied to existing plots
-        end
-    end
+    
+    # Apply each setting to the plot
+    plot!(p; theme_dict...)
+    
     return p
 end
 
-# Default science theme (equivalent to 'science' style in SciencePlots)
+"""
+    science_theme()
+
+Create a dictionary with the default science theme settings.
+"""
 function science_theme()
-    default_theme = Dict(
+    return Dict(
         # Figure size
         :size => (350, 262), # in pixels, roughly 3.5 x 2.625 inches @ 100 dpi
         
         # Colors based on 'std-colors' scheme
         :palette => [
-            colorant"#0C5DA5", # blue
-            colorant"#00B945", # green
-            colorant"#FF9500", # yellow
-            colorant"#FF2C00", # red
-            colorant"#845B97", # violet
-            colorant"#474747", # dark gray
-            colorant"#9e9e9e"  # light gray
+            hex_to_color("#0C5DA5"), # blue
+            hex_to_color("#00B945"), # green
+            hex_to_color("#FF9500"), # yellow
+            hex_to_color("#FF2C00"), # red
+            hex_to_color("#845B97"), # violet
+            hex_to_color("#474747"), # dark gray
+            hex_to_color("#9e9e9e")  # light gray
         ],
         
         # Axis styling
@@ -129,26 +140,16 @@ function science_theme()
         :fontfamily => "serif",
         
         # LaTeX settings
-        :mathfontfamily => "serif",
-        :tickfont => "Computer Modern",
-        :guidefont => "Computer Modern",
-        :legendfont => "Computer Modern",
-        
-        # Legend properties
-        :legend_frame => :none,
-        
-        # Margins
-        :margin => 3Plots.mm,
-        
-        # Default to LaTeX rendering for labels
         :plot_titlefontfamily => "serif",
         :title => false
     )
-    
-    return default_theme
 end
 
-# Register base styles
+"""
+    register_base_styles()
+
+Register the base scientific style.
+"""
 function register_base_styles()
     # Register the base 'science' style
     STYLES["science"] = Dict(
@@ -158,7 +159,11 @@ function register_base_styles()
     )
 end
 
-# Register color styles
+"""
+    register_color_styles()
+
+Register color schemes from Paul Tol's website.
+"""
 function register_color_styles()
     # Standard color schemes from Paul Tol's website
     
@@ -166,134 +171,158 @@ function register_color_styles()
     STYLES["bright"] = Dict(
         :category => "color",
         :description => "Bright color scheme (color-blind safe)",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#4477AA", 
-                colorant"#EE6677", 
-                colorant"#228833", 
-                colorant"#CCBB44", 
-                colorant"#66CCEE", 
-                colorant"#AA3377", 
-                colorant"#BBBBBB"
+                hex_to_color("#4477AA"), 
+                hex_to_color("#EE6677"), 
+                hex_to_color("#228833"), 
+                hex_to_color("#CCBB44"), 
+                hex_to_color("#66CCEE"), 
+                hex_to_color("#AA3377"), 
+                hex_to_color("#BBBBBB")
             ]
-        ))
+        )
     )
     
     # Vibrant color scheme
     STYLES["vibrant"] = Dict(
         :category => "color",
         :description => "Vibrant color scheme (color-blind safe)",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#EE7733", 
-                colorant"#0077BB", 
-                colorant"#33BBEE", 
-                colorant"#EE3377", 
-                colorant"#CC3311", 
-                colorant"#009988", 
-                colorant"#BBBBBB"
+                hex_to_color("#EE7733"), 
+                hex_to_color("#0077BB"), 
+                hex_to_color("#33BBEE"), 
+                hex_to_color("#EE3377"), 
+                hex_to_color("#CC3311"), 
+                hex_to_color("#009988"), 
+                hex_to_color("#BBBBBB")
             ]
-        ))
+        )
     )
     
     # Muted color scheme
     STYLES["muted"] = Dict(
         :category => "color",
         :description => "Muted color scheme (color-blind safe)",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#CC6677", 
-                colorant"#332288", 
-                colorant"#DDCC77", 
-                colorant"#117733", 
-                colorant"#88CCEE", 
-                colorant"#882255", 
-                colorant"#44AA99", 
-                colorant"#999933", 
-                colorant"#AA4499", 
-                colorant"#DDDDDD"
+                hex_to_color("#CC6677"), 
+                hex_to_color("#332288"), 
+                hex_to_color("#DDCC77"), 
+                hex_to_color("#117733"), 
+                hex_to_color("#88CCEE"), 
+                hex_to_color("#882255"), 
+                hex_to_color("#44AA99"), 
+                hex_to_color("#999933"), 
+                hex_to_color("#AA4499"), 
+                hex_to_color("#DDDDDD")
             ]
-        ))
+        )
     )
     
     # Light color scheme
     STYLES["light"] = Dict(
         :category => "color",
         :description => "Light color scheme (color-blind safe)",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#77AADD", 
-                colorant"#EE8866", 
-                colorant"#EEDD88", 
-                colorant"#FFAABB", 
-                colorant"#99DDFF", 
-                colorant"#44BB99", 
-                colorant"#BBCC33", 
-                colorant"#AAAA00", 
-                colorant"#DDDDDD"
+                hex_to_color("#77AADD"), 
+                hex_to_color("#EE8866"), 
+                hex_to_color("#EEDD88"), 
+                hex_to_color("#FFAABB"), 
+                hex_to_color("#99DDFF"), 
+                hex_to_color("#44BB99"), 
+                hex_to_color("#BBCC33"), 
+                hex_to_color("#AAAA00"), 
+                hex_to_color("#DDDDDD")
             ]
-        ))
+        )
     )
     
     # High-contrast color scheme
     STYLES["high-contrast"] = Dict(
         :category => "color",
         :description => "High-contrast color scheme (color-blind safe)",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#004488", 
-                colorant"#DDAA33", 
-                colorant"#BB5566"
+                hex_to_color("#004488"), 
+                hex_to_color("#DDAA33"), 
+                hex_to_color("#BB5566")
             ]
-        ))
+        )
     )
     
     # Retro color scheme
     STYLES["retro"] = Dict(
         :category => "color",
         :description => "Retro color scheme",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#4165c0", 
-                colorant"#e770a2", 
-                colorant"#5ac3be", 
-                colorant"#696969", 
-                colorant"#f79a1e", 
-                colorant"#ba7dcd"
+                hex_to_color("#4165c0"), 
+                hex_to_color("#e770a2"), 
+                hex_to_color("#5ac3be"), 
+                hex_to_color("#696969"), 
+                hex_to_color("#f79a1e"), 
+                hex_to_color("#ba7dcd")
             ]
-        ))
+        )
     )
     
     # High-vis color scheme
     STYLES["high-vis"] = Dict(
         :category => "color",
         :description => "High visibility color scheme",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :palette => [
-                colorant"#0d49fb", 
-                colorant"#e6091c", 
-                colorant"#26eb47", 
-                colorant"#8936df", 
-                colorant"#fec32d", 
-                colorant"#25d7fd"
+                hex_to_color("#0d49fb"), 
+                hex_to_color("#e6091c"), 
+                hex_to_color("#26eb47"), 
+                hex_to_color("#8936df"), 
+                hex_to_color("#fec32d"), 
+                hex_to_color("#25d7fd")
             ],
             :linestyle => [:solid, :dash, :dashdot, :dot, :solid, :dash]
-        ))
+        )
     )
     
-    # Register discrete rainbow color schemes
+    # Register discrete rainbow color schemes (1-23 colors)
     for n in 1:23
         STYLES["discrete-rainbow-$n"] = Dict(
             :category => "color",
             :description => "Discrete rainbow color scheme with $n colors",
-            :theme => merge(science_theme(), Dict(
+            :theme => Dict(
                 :palette => rainbow_colors(n)
-            ))
+            )
         )
     end
+    
+    # Scatter style
+    STYLES["scatter"] = Dict(
+        :category => "color",
+        :description => "Style for scatter plots",
+        :theme => Dict(
+            :markershape => [:circle, :rect, :utriangle, :dtriangle, :ltriangle, :rtriangle, :diamond],
+            :markersize => 3,
+            :palette => [
+                hex_to_color("#0C5DA5"), # blue
+                hex_to_color("#00B945"), # green
+                hex_to_color("#FF9500"), # yellow
+                hex_to_color("#FF2C00"), # red
+                hex_to_color("#845B97"), # violet
+                hex_to_color("#474747"), # dark gray
+                hex_to_color("#9e9e9e")  # light gray
+            ],
+            :linestyle => :none
+        )
+    )
 end
 
-# Rainbow color generator (subset based on number of colors)
+"""
+    rainbow_colors(n::Int)
+
+Generate a color palette with n colors from Paul Tol's discrete rainbow.
+"""
 function rainbow_colors(n::Int)
     # Full rainbow palette from Paul Tol
     full_palette = [
@@ -305,114 +334,92 @@ function rainbow_colors(n::Int)
     
     # Select subset based on predefined combinations
     if n == 1
-        return [colorant"#1965B0"]
+        return [hex_to_color("#1965B0")]
     elseif n == 2
-        return [colorant"#1965B0", colorant"#DC050C"]
+        return [hex_to_color("#1965B0"), hex_to_color("#DC050C")]
     elseif n == 3
-        return [colorant"#1965B0", colorant"#F7F056", colorant"#DC050C"]
+        return [hex_to_color("#1965B0"), hex_to_color("#F7F056"), hex_to_color("#DC050C")]
     elseif n == 4
-        return [colorant"#1965B0", colorant"#4EB265", colorant"#F7F056", colorant"#DC050C"]
+        return [hex_to_color("#1965B0"), hex_to_color("#4EB265"), hex_to_color("#F7F056"), hex_to_color("#DC050C")]
     elseif n == 5
-        return [colorant"#1965B0", colorant"#7BAFDE", colorant"#4EB265", colorant"#F7F056", colorant"#DC050C"]
+        return [hex_to_color("#1965B0"), hex_to_color("#7BAFDE"), hex_to_color("#4EB265"), hex_to_color("#F7F056"), hex_to_color("#DC050C")]
     elseif n <= 23
         # For larger palettes, use the specified colors from full palette
         # This is a simplified approach; the actual mappings are in the .mplstyle files
         indices = round.(Int, range(1, length(full_palette), length=n))
-        return [colorant(full_palette[i]) for i in indices]
+        return [hex_to_color(full_palette[i]) for i in indices]
     else
         # Fall back to a color generator for larger values
-        return distinguishable_colors(n, [colorant"#1965B0", colorant"#DC050C"])
+        return distinguishable_colors(n, [hex_to_color("#1965B0"), hex_to_color("#DC050C")])
     end
 end
 
-# Register journal styles
+"""
+    register_journal_styles()
+
+Register journal-specific plot styles.
+"""
 function register_journal_styles()
     # IEEE style
     STYLES["ieee"] = Dict(
         :category => "journals",
         :description => "IEEE journal style",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :size => (330, 250), # 3.3 x 2.5 inches
             :dpi => 600,
-            :fontfamily => "serif",
-            :tickfont => "Times New Roman",
-            :guidefont => "Times New Roman",
-            :legendfont => "Times New Roman",
-            :fontsize => 8,
             :palette => [
-                colorant"#000000", # black
-                colorant"#FF0000", # red
-                colorant"#0000FF", # blue
-                colorant"#00FF00"  # green
+                hex_to_color("#000000"), # black
+                hex_to_color("#FF0000"), # red
+                hex_to_color("#0000FF"), # blue
+                hex_to_color("#00FF00")  # green
             ],
             :linestyle => [:solid, :dash, :dot, :dashdot]
-        ))
+        )
     )
     
     # Nature style
     STYLES["nature"] = Dict(
         :category => "journals",
         :description => "Nature journal style",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :size => (330, 250), # 3.3 x 2.5 inches
             :fontfamily => "sans-serif",
-            :tickfont => "DejaVu Sans",
-            :guidefont => "DejaVu Sans",
-            :legendfont => "DejaVu Sans",
             :fontsize => 7,
             :guidefontsize => 7,
             :tickfontsize => 7,
             :legendfontsize => 7,
-            :titlelocation => :left,
             :titlefontsize => 7,
             :linewidth => 1.0,
-            :framestyle => :box,
-            :margin => 1Plots.mm
-        ))
+            :framestyle => :box
+        )
     )
 end
 
-# Register miscellaneous styles
+"""
+    register_misc_styles()
+
+Register miscellaneous plot styles.
+"""
 function register_misc_styles()
     # Grid style
     STYLES["grid"] = Dict(
         :category => "misc",
         :description => "Grid lines and legend frame",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :grid => true,
             :gridstyle => :dash,
             :gridcolor => :black,
             :gridalpha => 0.5,
             :gridlinewidth => 0.5,
-            :legend_frame => :true
-        ))
-    )
-    
-    # Scatter style
-    STYLES["scatter"] = Dict(
-        :category => "misc",
-        :description => "Style for scatter plots",
-        :theme => merge(science_theme(), Dict(
-            :markershape => [:circle, :rect, :utriangle, :dtriangle, :ltriangle, :rtriangle, :diamond],
-            :markersize => 3,
-            :palette => [
-                colorant"#0C5DA5", # blue
-                colorant"#00B945", # green
-                colorant"#FF9500", # yellow
-                colorant"#FF2C00", # red
-                colorant"#845B97", # violet
-                colorant"#474747", # dark gray
-                colorant"#9e9e9e"  # light gray
-            ],
-            :linestyle => :none
-        ))
+            :legend_frame => true
+        )
     )
     
     # Notebook style (larger figures for notebooks)
     STYLES["notebook"] = Dict(
         :category => "misc",
         :description => "Style for Jupyter notebooks",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :size => (800, 600),
             :tickfontsize => 16,
             :guidefontsize => 16,
@@ -421,150 +428,131 @@ function register_misc_styles()
             :linewidth => 2.0,
             :framestyle => :box,
             :fontfamily => "sans-serif"
-        ))
+        )
     )
     
     # No-LaTeX style
     STYLES["no-latex"] = Dict(
         :category => "misc",
         :description => "Style without LaTeX rendering",
-        :theme => merge(science_theme(), Dict(
-            :fontfamily => "serif",
-            :tickfont => "Computer Modern",
-            :guidefont => "Computer Modern",
-            :legendfont => "Computer Modern"
-        ))
+        :theme => Dict(
+            :fontfamily => "serif"
+        )
     )
     
     # Sans-serif style
     STYLES["sans"] = Dict(
         :category => "misc",
         :description => "Style with sans-serif fonts",
-        :theme => merge(science_theme(), Dict(
-            :fontfamily => "sans-serif",
-            :tickfont => "DejaVu Sans",
-            :guidefont => "DejaVu Sans",
-            :legendfont => "DejaVu Sans"
-        ))
+        :theme => Dict(
+            :fontfamily => "sans-serif"
+        )
     )
 end
 
-# Register language-specific styles
+"""
+    register_language_styles()
+
+Register language-specific font styles.
+"""
 function register_language_styles()
     # CJK fonts for Traditional Chinese
     STYLES["cjk-tc-font"] = Dict(
         :category => "languages",
         :description => "Font support for Traditional Chinese",
-        :theme => merge(science_theme(), Dict(
-            :fontfamily => "serif",
-            :tickfont => "Noto Serif CJK TC",
-            :guidefont => "Noto Serif CJK TC",
-            :legendfont => "Noto Serif CJK TC"
-        ))
+        :theme => Dict(
+            :fontfamily => "Noto Serif CJK TC"
+        )
     )
     
     # CJK fonts for Simplified Chinese
     STYLES["cjk-sc-font"] = Dict(
         :category => "languages",
         :description => "Font support for Simplified Chinese",
-        :theme => merge(science_theme(), Dict(
-            :fontfamily => "serif",
-            :tickfont => "Noto Serif CJK SC",
-            :guidefont => "Noto Serif CJK SC",
-            :legendfont => "Noto Serif CJK SC"
-        ))
+        :theme => Dict(
+            :fontfamily => "Noto Serif CJK SC"
+        )
     )
     
     # CJK fonts for Japanese
     STYLES["cjk-jp-font"] = Dict(
         :category => "languages",
         :description => "Font support for Japanese",
-        :theme => merge(science_theme(), Dict(
-            :fontfamily => "serif",
-            :tickfont => "Noto Serif CJK JP",
-            :guidefont => "Noto Serif CJK JP",
-            :legendfont => "Noto Serif CJK JP"
-        ))
+        :theme => Dict(
+            :fontfamily => "Noto Serif CJK JP"
+        )
     )
     
     # CJK fonts for Korean
     STYLES["cjk-kr-font"] = Dict(
         :category => "languages",
         :description => "Font support for Korean",
-        :theme => merge(science_theme(), Dict(
-            :fontfamily => "serif",
-            :tickfont => "Noto Serif CJK KR",
-            :guidefont => "Noto Serif CJK KR",
-            :legendfont => "Noto Serif CJK KR"
-        ))
+        :theme => Dict(
+            :fontfamily => "Noto Serif CJK KR"
+        )
     )
     
     # Russian fonts
     STYLES["russian-font"] = Dict(
         :category => "languages",
         :description => "Font support for Russian",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :fontfamily => "serif"
-            # Note: For full Cyrillic support, LaTeX-specific configuration should be 
-            # handled by the LaTeX backend with appropriate packages
-        ))
+        )
     )
     
     # Turkish fonts
     STYLES["turkish-font"] = Dict(
         :category => "languages",
         :description => "Font support for Turkish",
-        :theme => merge(science_theme(), Dict(
+        :theme => Dict(
             :fontfamily => "serif"
-            # Note: For full Turkish character support, LaTeX-specific configuration should be 
-            # handled by the LaTeX backend with appropriate packages
-        ))
+        )
     )
 end
 
-# Register combination styles
+"""
+    register_combination_styles()
+
+Register combined styles (e.g., science+ieee).
+"""
 function register_combination_styles()
     # Science + IEEE
     STYLES["science+ieee"] = Dict(
         :category => "combinations",
         :description => "Science style with IEEE specifics",
-        :theme => merge(STYLES["science"][:theme], STYLES["ieee"][:theme])
+        :theme => merge(copy(STYLES["science"][:theme]), copy(STYLES["ieee"][:theme]))
     )
     
     # Science + Nature
     STYLES["science+nature"] = Dict(
         :category => "combinations",
         :description => "Science style with Nature journal specifics",
-        :theme => merge(STYLES["science"][:theme], STYLES["nature"][:theme])
+        :theme => merge(copy(STYLES["science"][:theme]), copy(STYLES["nature"][:theme]))
     )
     
     # Science + Grid
     STYLES["science+grid"] = Dict(
         :category => "combinations",
         :description => "Science style with grid lines",
-        :theme => merge(STYLES["science"][:theme], STYLES["grid"][:theme])
+        :theme => merge(copy(STYLES["science"][:theme]), copy(STYLES["grid"][:theme]))
     )
     
-    # Add more combinations for common use cases
-    for color_style in ["bright", "vibrant", "muted", "high-vis", "retro", "high-contrast"]
+    # Combinations with color schemes
+    for color_style in ["bright", "vibrant", "muted", "high-vis", "retro", "high-contrast", "scatter"]
         STYLES["science+$color_style"] = Dict(
             :category => "combinations",
             :description => "Science style with $color_style color scheme",
-            :theme => merge(STYLES["science"][:theme], STYLES[color_style][:theme])
+            :theme => merge(copy(STYLES["science"][:theme]), copy(STYLES[color_style][:theme]))
         )
     end
 end
 
-function __init__()
-    register_base_styles()
-    register_color_styles()
-    register_journal_styles()
-    register_misc_styles()
-    register_language_styles()
-    register_combination_styles()
-    
-    # Set the default style to "science"
-    # Plots.theme(science_theme())
-end
+register_base_styles()
+register_color_styles()
+register_journal_styles()
+register_misc_styles()
+register_language_styles()
+register_combination_styles()
 
-end
+end 

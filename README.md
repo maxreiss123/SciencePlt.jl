@@ -28,5 +28,8 @@ Will provide a simple interface for creating professional scientific plots in Ju
  # Acknowledgement
  - The package was inspired by the great looking [SciencePlots](https://github.com/garrettj403/SciencePlots)
 
+# Example Plot
+
+![SciencePlt Preview](figures/fig01_science.pdf "SciencePlt Screenshot")
 
 ## Work in progress

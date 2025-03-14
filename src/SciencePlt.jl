@@ -387,7 +387,6 @@ function register_journal_styles()
         :theme => Dict(
             :size => (330, 250), # 3.3 x 2.5 inches
             :fontfamily => "sans-serif",
-            :fontsize => 7,
             :guidefontsize => 7,
             :tickfontsize => 7,
             :legendfontsize => 7,
@@ -413,8 +412,7 @@ function register_misc_styles()
             :gridstyle => :dash,
             :gridcolor => :black,
             :gridalpha => 0.5,
-            :gridlinewidth => 0.5,
-            :legend_frame => true
+            :gridlinewidth => 0.5
         )
     )
     

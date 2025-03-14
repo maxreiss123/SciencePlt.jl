@@ -10,7 +10,7 @@ Will provide a simple interface for creating professional scientific plots in Ju
 
 - Clean, publication-ready theme optimized for scientific figures
 - Proper font selection (Times New Roman) suitable for scientific publications
-- Carefully selected color palette for good contrast and readability
+- Color palette for good contrast and readability
 - Sensible defaults for plot dimensions, tick marks, and grid lines
 
 

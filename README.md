@@ -22,7 +22,22 @@ Will provide a simple interface for creating professional scientific plots in Ju
     Pkg.add(url="https://github.com/maxreiss123/SciencePlt.jl.git")
 
     ```
-- The usage of the various styles is given in the examples
+- Employ the styles as given in examples:
+  ```julia
+      using SciencePlt
+      using Plots
+      using LaTeXStrings
+
+      x = [i for i in 1:10]
+      y = x .^ 2
+
+      #short look what styles are available: 
+      list_styles()
+      use_style("science") 
+
+      plot(x,y, title=L"Function: X^2")
+
+    ```
  
   
  # Acknowledgement
@@ -30,6 +45,6 @@ Will provide a simple interface for creating professional scientific plots in Ju
 
 # Example Plot
 
-![SciencePlt Preview](figures/fig01_science.pdf "SciencePlt Screenshot")
+![SciencePlt Preview](figures/fig01_science.jpg "SciencePlt Screenshot")
 
 ## Work in progress

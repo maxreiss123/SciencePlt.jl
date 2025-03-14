@@ -48,3 +48,4 @@ Will provide a simple interface for creating professional scientific plots in Ju
 ![SciencePlt Preview](figures/fig01_science.jpg "SciencePlt Screenshot")
 
 ## Work in progress
+  - [ ] Setting the defintions to work for Makie.jl 
